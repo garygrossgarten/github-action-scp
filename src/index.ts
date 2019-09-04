@@ -4,8 +4,7 @@ import {
   Hook,
   onStart,
   usesPlugins,
-  Command,
-  param
+  Command
 } from "@fivethree/billy-core";
 import { CorePlugin } from "@fivethree/billy-plugin-core";
 import {
@@ -32,7 +31,8 @@ export class SCP {
     @input("privateKey") privateKey: string,
     @input("password") password: string,
     @input("passphrase") passphrase: string,
-    @input("tryKeyboard") tryKeyboard: boolean
+    @input("tryKeyboard") tryKeyboard: boolean,
+    @input("concurrency") concurrency = 1
   ) {
     const ssh = await this.connect(
       host,
@@ -44,7 +44,7 @@ export class SCP {
       tryKeyboard
     );
 
-    await this.scp(ssh, local, remote);
+    await this.scp(ssh, local, remote, concurrency);
 
     ssh.dispose();
   }
@@ -85,38 +85,86 @@ export class SCP {
     return ssh;
   }
 
-  private async scp(ssh: node_ssh, local: string, remote: string) {
+  private async scp(
+    ssh: node_ssh,
+    local: string,
+    remote: string,
+    concurrency: number
+  ) {
     const m2 = await this.colorize("orange", `Starting scp Action:`);
     console.log(`${m2} ${local} to ${remote}`);
 
     try {
-      const failed = [];
-      const successful = [];
-      const status = await ssh.putDirectory(local, remote, {
-        recursive: true,
-        concurrency: 1,
-        tick: function(localPath, remotePath, error) {
-          if (error) {
-            failed.push(localPath);
-          } else {
-            successful.push(localPath);
-          }
-        }
-      });
-
+      await this.putDirectory(ssh, local, remote, concurrency, 3, true);
       ssh.dispose();
-
-      console.log(
-        "the directory transfer was",
-        status ? "successful" : "unsuccessful"
-      );
-      console.log("failed transfers", failed.join(", "));
-      console.log("successful transfers", successful.join(", "));
-
       console.log("✅ scp Action finished.");
     } catch (err) {
       console.error(`⚠️ An error happened:(.`, err.message, err.stack);
       process.abort();
     }
+  }
+  async putDirectory(
+    ssh: node_ssh,
+    local: string,
+    remote: string,
+    concurrency = 3,
+    retry = 3,
+    verbose = false
+  ) {
+    let retries = 0;
+    const failed: { local: string; remote: string }[] = [];
+    const successful = [];
+    const status = await ssh.putDirectory(local, remote, {
+      recursive: true,
+      concurrency: 1,
+      tick: function(localPath, remotePath, error) {
+        if (error) {
+          if (verbose) {
+            console.log(`❕copy failed for ${localPath}.`);
+          }
+          failed.push({ local: localPath, remote: remotePath });
+        } else {
+          if (verbose) {
+            console.log(`✔ successfully copied ${localPath}.`);
+          }
+          successful.push({ local: localPath, remote: remotePath });
+        }
+      }
+    });
+
+    console.log(
+      "the directory transfer was",
+      status ? "successful" : "unsuccessful"
+    );
+    if (failed.length > 0) {
+      console.log("failed transfers", failed.join(", "));
+      await this.putFiles(ssh, failed, concurrency);
+    }
+  }
+  async putFiles(
+    ssh: node_ssh,
+    files: { local: string; remote: string }[],
+    concurrency: number
+  ) {
+    try {
+      const status = await ssh.putFiles(files, { concurrency: concurrency });
+    } catch (error) {
+      console.error(`⚠️ An error happened:(.`, error.message, error.stack);
+    }
+  }
+
+  @Command("test")
+  async test() {
+    const ssh = await this.connect(
+      "ssh.strato.de",
+      "koelnerhofdernau.de",
+      22,
+      null,
+      "Powerkit2709*",
+      null,
+      null
+    );
+
+    await this.scp(ssh, "node_modules", "test", 3);
   }
 }

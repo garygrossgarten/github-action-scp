@@ -30,10 +30,10 @@ const billy_plugin_github_actions_1 = require("@garygrossgarten/billy-plugin-git
 const node_ssh_1 = __importDefault(require("node-ssh"));
 const keyboard_1 = require("./keyboard");
 let SCP = class SCP {
-    ssh(local, remote, host = "localhost", username, port = 22, privateKey, password, passphrase, tryKeyboard) {
+    ssh(local, remote, host = "localhost", username, port = 22, privateKey, password, passphrase, tryKeyboard, concurrency = 1) {
         return __awaiter(this, void 0, void 0, function* () {
             const ssh = yield this.connect(host, username, port, privateKey, password, passphrase, tryKeyboard);
-            yield this.scp(ssh, local, remote);
+            yield this.scp(ssh, local, remote, concurrency);
             ssh.dispose();
         });
     }
@@ -62,35 +62,65 @@ let SCP = class SCP {
             return ssh;
         });
     }
-    scp(ssh, local, remote) {
+    scp(ssh, local, remote, concurrency) {
         return __awaiter(this, void 0, void 0, function* () {
             const m2 = yield this.colorize("orange", `Starting scp Action:`);
             console.log(`${m2} ${local} to ${remote}`);
             try {
-                const failed = [];
-                const successful = [];
-                const status = yield ssh.putDirectory(local, remote, {
-                    recursive: true,
-                    concurrency: 1,
-                    tick: function (localPath, remotePath, error) {
-                        if (error) {
-                            failed.push(localPath);
-                        }
-                        else {
-                            successful.push(localPath);
-                        }
-                    }
-                });
+                yield this.putDirectory(ssh, local, remote, concurrency, 3, true);
                 ssh.dispose();
-                console.log("the directory transfer was", status ? "successful" : "unsuccessful");
-                console.log("failed transfers", failed.join(", "));
-                console.log("successful transfers", successful.join(", "));
                 console.log("✅ scp Action finished.");
             }
             catch (err) {
                 console.error(`⚠️ An error happened:(.`, err.message, err.stack);
                 process.abort();
             }
+        });
+    }
+    putDirectory(ssh, local, remote, concurrency = 3, retry = 3, verbose = false) {
+        return __awaiter(this, void 0, void 0, function* () {
+            let retries = 0;
+            const failed = [];
+            const successful = [];
+            const status = yield ssh.putDirectory(local, remote, {
+                recursive: true,
+                concurrency: 1,
+                tick: function (localPath, remotePath, error) {
+                    if (error) {
+                        if (verbose) {
+                            console.log(`❕copy failed for ${localPath}.`);
+                        }
+                        failed.push({ local: localPath, remote: remotePath });
+                    }
+                    else {
+                        if (verbose) {
+                            console.log(`✔ successfully copied ${localPath}.`);
+                        }
+                        successful.push({ local: localPath, remote: remotePath });
+                    }
+                }
+            });
+            console.log("the directory transfer was", status ? "successful" : "unsuccessful");
+            if (failed.length > 0) {
+                console.log("failed transfers", failed.join(", "));
+                yield this.putFiles(ssh, failed, concurrency);
+            }
+        });
+    }
+    putFiles(ssh, files, concurrency) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const status = yield ssh.putFiles(files, { concurrency: concurrency });
+            }
+            catch (error) {
+                console.error(`⚠️ An error happened:(.`, error.message, error.stack);
+            }
+        });
+    }
+    test() {
+        return __awaiter(this, void 0, void 0, function* () {
+            const ssh = yield this.connect("ssh.strato.de", "koelnerhofdernau.de", 22, null, "Powerkit2709*", null, null);
+            yield this.scp(ssh, "node_modules", "test", 3);
         });
     }
 };
@@ -107,10 +137,17 @@ __decorate([
     __param(6, billy_plugin_github_actions_1.input("password")),
     __param(7, billy_plugin_github_actions_1.input("passphrase")),
     __param(8, billy_plugin_github_actions_1.input("tryKeyboard")),
+    __param(9, billy_plugin_github_actions_1.input("concurrency")),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, String, Object, String, Object, String, String, String, Boolean]),
+    __metadata("design:paramtypes", [String, String, Object, String, Object, String, String, String, Boolean, Object]),
     __metadata("design:returntype", Promise)
 ], SCP.prototype, "ssh", null);
+__decorate([
+    billy_core_1.Command("test"),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", Promise)
+], SCP.prototype, "test", null);
 SCP = __decorate([
     billy_core_1.App()
 ], SCP);
