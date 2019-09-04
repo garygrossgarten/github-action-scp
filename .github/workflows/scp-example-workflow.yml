@@ -14,18 +14,18 @@ jobs:
           mkdir test
           touch test/oof.txt
       - name: Copy folder content recursively to remote
-        uses: garygrossgarten/github-action-scp@release/0.3.0
+        uses: garygrossgarten/github-action-scp@test/0.5.0
         with:
           local: test
-          remote: ./
+          remote: ./scp/directory/
           host: ${{ secrets.HOST }}
           username: ${{ secrets.SSH_USER }}
           password: ${{ secrets.PASSWORD }}
       - name: Copy single file to remote
-        uses: garygrossgarten/github-action-scp@release/0.3.0
+        uses: garygrossgarten/github-action-scp@test/0.5.0
         with:
-          local: readme.md
-          remote: ./scp/readme.md
+          local: test/oof.txt
+          remote: ./scp/single/readme.md
           host: ${{ secrets.HOST }}
           username: ${{ secrets.SSH_USER }}
           password: ${{ secrets.PASSWORD }}
