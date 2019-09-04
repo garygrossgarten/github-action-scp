@@ -11,7 +11,7 @@ Simple GitHub Action to copy a folder to a remote server using SSH. This is work
   uses: garygrossgarten/github-action-scp@release
   with:
     local: www
-    remote: .
+    remote: ./
     host: ${{ secrets.HOST }}
     username: garygrossgarten
     passphrase: ${{ secrets.PASSPHRASE }}
@@ -20,7 +20,7 @@ Simple GitHub Action to copy a folder to a remote server using SSH. This is work
 
 🔐 Set your secrets here: `https://github.com/USERNAME/REPO/settings/secrets`.
 
-Check out [the workflow example](.github/workflows/ssh-example-workflow.yml) for a minimalistic yaml workflow in GitHub Actions.
+Check out [the workflow example](.github/workflows/scp-example-workflow.yml) for a minimalistic yaml workflow in GitHub Actions.
 
 **Result**
 

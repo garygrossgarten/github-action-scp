@@ -71,7 +71,7 @@ let SCP = class SCP {
                 const successful = [];
                 const status = yield ssh.putDirectory(local, remote, {
                     recursive: true,
-                    concurrency: 10,
+                    concurrency: 1,
                     tick: function (localPath, remotePath, error) {
                         if (error) {
                             failed.push(localPath);

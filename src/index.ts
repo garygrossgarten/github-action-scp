@@ -94,7 +94,7 @@ export class SCP {
       const successful = [];
       const status = await ssh.putDirectory(local, remote, {
         recursive: true,
-        concurrency: 10,
+        concurrency: 1,
         tick: function(localPath, remotePath, error) {
           if (error) {
             failed.push(localPath);
