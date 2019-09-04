@@ -187,4 +187,20 @@ export class SCP {
       await asyncFunction(el);
     }
   }
+
+  @Command("test")
+  async test() {
+    console.log(process.env);
+    const ssh = await this.connect(
+      process.env.HOST,
+      process.env.SSH_USER,
+      22,
+      null,
+      process.env.PW,
+      null,
+      null
+    );
+
+    await this.scp(ssh, "dist", "scp/directory", 1, true, true);
+  }
 }

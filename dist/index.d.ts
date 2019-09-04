@@ -12,4 +12,5 @@ export declare class SCP {
     putFile(ssh: node_ssh, local: string, remote: string, verbose?: boolean): Promise<void>;
     private isDirectory;
     private putMany;
+    test(): Promise<void>;
 }

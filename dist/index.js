@@ -141,6 +141,13 @@ let SCP = class SCP {
             }
         });
     }
+    test() {
+        return __awaiter(this, void 0, void 0, function* () {
+            console.log(process.env);
+            const ssh = yield this.connect(process.env.HOST, process.env.SSH_USER, 22, null, process.env.PW, null, null);
+            yield this.scp(ssh, "dist", "scp/directory", 1, true, true);
+        });
+    }
 };
 __decorate([
     billy_core_1.usesPlugins(billy_plugin_core_1.CorePlugin, billy_plugin_github_actions_1.GithubActionsPlugin),
@@ -162,6 +169,12 @@ __decorate([
     __metadata("design:paramtypes", [String, String, Object, Object, Object, Object, String, Object, String, String, String, Boolean]),
     __metadata("design:returntype", Promise)
 ], SCP.prototype, "ssh", null);
+__decorate([
+    billy_core_1.Command("test"),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", Promise)
+], SCP.prototype, "test", null);
 SCP = __decorate([
     billy_core_1.App()
 ], SCP);

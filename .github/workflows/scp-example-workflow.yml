@@ -14,10 +14,10 @@ jobs:
           mkdir test
           touch test/oof.txt
       - name: Copy folder content recursively to remote
-        uses: garygrossgarten/github-action-scp@test/0.5.0
+        uses: garygrossgarten/github-action-scp@test/0.5.2
         with:
           local: test
-          remote: ./scp/directory/
+          remote: ./scp/directory
           host: ${{ secrets.HOST }}
           username: ${{ secrets.SSH_USER }}
           password: ${{ secrets.PASSWORD }}
