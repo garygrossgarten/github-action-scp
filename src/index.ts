@@ -169,8 +169,9 @@ export class SCP {
         console.log(`✔ Successfully copied file ${local} to remote ${remote}.`);
       }
     } catch (error) {
-      ssh.dispose();
       console.error(`⚠️ An error happened:(.`, error.message, error.stack);
+      ssh.dispose();
+      process.abort();
     }
   }
 
