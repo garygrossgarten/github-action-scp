@@ -27,13 +27,14 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const billy_core_1 = require("@fivethree/billy-core");
 const billy_plugin_core_1 = require("@fivethree/billy-plugin-core");
 const billy_plugin_github_actions_1 = require("@garygrossgarten/billy-plugin-github-actions");
+const fs_1 = __importDefault(require("fs"));
 const node_ssh_1 = __importDefault(require("node-ssh"));
 const keyboard_1 = require("./keyboard");
 let SCP = class SCP {
-    ssh(local, remote, host = "localhost", username, port = 22, privateKey, password, passphrase, tryKeyboard, concurrency = 1) {
+    ssh(local, remote, concurrency = 1, recursive = true, verbose = true, host = "localhost", username, port = 22, privateKey, password, passphrase, tryKeyboard) {
         return __awaiter(this, void 0, void 0, function* () {
             const ssh = yield this.connect(host, username, port, privateKey, password, passphrase, tryKeyboard);
-            yield this.scp(ssh, local, remote, concurrency);
+            yield this.scp(ssh, local, remote, concurrency, verbose, recursive);
             ssh.dispose();
         });
     }
@@ -62,29 +63,34 @@ let SCP = class SCP {
             return ssh;
         });
     }
-    scp(ssh, local, remote, concurrency) {
+    scp(ssh, local, remote, concurrency, verbose = true, recursive = true) {
         return __awaiter(this, void 0, void 0, function* () {
             const m2 = yield this.colorize("orange", `Starting scp Action:`);
             console.log(`${m2} ${local} to ${remote}`);
             try {
-                yield this.putDirectory(ssh, local, remote, concurrency, 3, true);
+                if (this.isDirectory("dist")) {
+                    yield this.putDirectory(ssh, local, remote, concurrency, verbose, recursive);
+                }
+                else {
+                    yield this.putFile(ssh, local, remote, verbose);
+                }
                 ssh.dispose();
                 console.log("✅ scp Action finished.");
             }
             catch (err) {
                 console.error(`⚠️ An error happened:(.`, err.message, err.stack);
+                ssh.dispose();
                 process.abort();
             }
         });
     }
-    putDirectory(ssh, local, remote, concurrency = 3, retry = 3, verbose = false) {
+    putDirectory(ssh, local, remote, concurrency = 3, verbose = false, recursive = true) {
         return __awaiter(this, void 0, void 0, function* () {
-            let retries = 0;
             const failed = [];
             const successful = [];
             const status = yield ssh.putDirectory(local, remote, {
-                recursive: true,
-                concurrency: 1,
+                recursive: recursive,
+                concurrency: concurrency,
                 tick: function (localPath, remotePath, error) {
                     if (error) {
                         if (verbose) {
@@ -100,27 +106,38 @@ let SCP = class SCP {
                     }
                 }
             });
-            console.log("the directory transfer was", status ? "successful" : "unsuccessful");
+            console.log(`The copy of directory ${local} was ${status ? "successful" : "unsuccessful"}.`);
             if (failed.length > 0) {
                 console.log("failed transfers", failed.join(", "));
-                yield this.putFiles(ssh, failed, concurrency);
+                yield this.putMany(failed, (failed) => __awaiter(this, void 0, void 0, function* () {
+                    console.log(`Retrying to copy ${failed.local} to ${failed.remote}.`);
+                    yield this.putFile(ssh, failed.local, failed.remote, true);
+                }));
             }
         });
     }
-    putFiles(ssh, files, concurrency) {
+    putFile(ssh, local, remote, verbose = true) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const status = yield ssh.putFiles(files, { concurrency: concurrency });
+                yield ssh.putFile(local, remote);
+                if (verbose) {
+                    console.log(`✔ Successfully copied file ${local} to remote ${remote}.`);
+                }
             }
             catch (error) {
+                ssh.dispose();
                 console.error(`⚠️ An error happened:(.`, error.message, error.stack);
             }
         });
     }
-    test() {
+    isDirectory(path) {
+        return fs_1.default.existsSync(path) && fs_1.default.lstatSync(path).isDirectory();
+    }
+    putMany(array, asyncFunction) {
         return __awaiter(this, void 0, void 0, function* () {
-            const ssh = yield this.connect("ssh.strato.de", "koelnerhofdernau.de", 22, null, "Powerkit2709*", null, null);
-            yield this.scp(ssh, "node_modules", "test", 3);
+            for (const el of array) {
+                yield asyncFunction(el);
+            }
         });
     }
 };
@@ -130,24 +147,20 @@ __decorate([
     billy_plugin_github_actions_1.GitHubAction(),
     __param(0, billy_plugin_github_actions_1.input("local")),
     __param(1, billy_plugin_github_actions_1.input("remote")),
-    __param(2, billy_plugin_github_actions_1.input("host")),
-    __param(3, billy_plugin_github_actions_1.input("username")),
-    __param(4, billy_plugin_github_actions_1.input("port")),
-    __param(5, billy_plugin_github_actions_1.input("privateKey")),
-    __param(6, billy_plugin_github_actions_1.input("password")),
-    __param(7, billy_plugin_github_actions_1.input("passphrase")),
-    __param(8, billy_plugin_github_actions_1.input("tryKeyboard")),
-    __param(9, billy_plugin_github_actions_1.input("concurrency")),
+    __param(2, billy_plugin_github_actions_1.input("concurrency")),
+    __param(3, billy_plugin_github_actions_1.input("recursive")),
+    __param(4, billy_plugin_github_actions_1.input("verbose")),
+    __param(5, billy_plugin_github_actions_1.input("host")),
+    __param(6, billy_plugin_github_actions_1.input("username")),
+    __param(7, billy_plugin_github_actions_1.input("port")),
+    __param(8, billy_plugin_github_actions_1.input("privateKey")),
+    __param(9, billy_plugin_github_actions_1.input("password")),
+    __param(10, billy_plugin_github_actions_1.input("passphrase")),
+    __param(11, billy_plugin_github_actions_1.input("tryKeyboard")),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, String, Object, String, Object, String, String, String, Boolean, Object]),
+    __metadata("design:paramtypes", [String, String, Object, Object, Object, Object, String, Object, String, String, String, Boolean]),
     __metadata("design:returntype", Promise)
 ], SCP.prototype, "ssh", null);
-__decorate([
-    billy_core_1.Command("test"),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", []),
-    __metadata("design:returntype", Promise)
-], SCP.prototype, "test", null);
 SCP = __decorate([
     billy_core_1.App()
 ], SCP);

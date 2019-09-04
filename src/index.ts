@@ -13,6 +13,7 @@ import {
   GitHubAction
 } from "@garygrossgarten/billy-plugin-github-actions";
 
+import fs from "fs";
 import node_ssh from "node-ssh";
 import { keyboardFunction } from "./keyboard";
 
@@ -25,14 +26,16 @@ export class SCP {
   async ssh(
     @input("local") local: string,
     @input("remote") remote: string,
+    @input("concurrency") concurrency = 1,
+    @input("recursive") recursive = true,
+    @input("verbose") verbose = true,
     @input("host") host = "localhost",
     @input("username") username: string,
     @input("port") port = 22,
     @input("privateKey") privateKey: string,
     @input("password") password: string,
     @input("passphrase") passphrase: string,
-    @input("tryKeyboard") tryKeyboard: boolean,
-    @input("concurrency") concurrency = 1
+    @input("tryKeyboard") tryKeyboard: boolean
   ) {
     const ssh = await this.connect(
       host,
@@ -44,7 +47,7 @@ export class SCP {
       tryKeyboard
     );
 
-    await this.scp(ssh, local, remote, concurrency);
+    await this.scp(ssh, local, remote, concurrency, verbose, recursive);
 
     ssh.dispose();
   }
@@ -89,17 +92,31 @@ export class SCP {
     ssh: node_ssh,
     local: string,
     remote: string,
-    concurrency: number
+    concurrency: number,
+    verbose = true,
+    recursive = true
   ) {
     const m2 = await this.colorize("orange", `Starting scp Action:`);
     console.log(`${m2} ${local} to ${remote}`);
 
     try {
-      await this.putDirectory(ssh, local, remote, concurrency, 3, true);
+      if (this.isDirectory("dist")) {
+        await this.putDirectory(
+          ssh,
+          local,
+          remote,
+          concurrency,
+          verbose,
+          recursive
+        );
+      } else {
+        await this.putFile(ssh, local, remote, verbose);
+      }
       ssh.dispose();
       console.log("✅ scp Action finished.");
     } catch (err) {
       console.error(`⚠️ An error happened:(.`, err.message, err.stack);
+      ssh.dispose();
       process.abort();
     }
   }
@@ -108,15 +125,14 @@ export class SCP {
     local: string,
     remote: string,
     concurrency = 3,
-    retry = 3,
-    verbose = false
+    verbose = false,
+    recursive = true
   ) {
-    let retries = 0;
     const failed: { local: string; remote: string }[] = [];
     const successful = [];
     const status = await ssh.putDirectory(local, remote, {
-      recursive: true,
-      concurrency: 1,
+      recursive: recursive,
+      concurrency: concurrency,
       tick: function(localPath, remotePath, error) {
         if (error) {
           if (verbose) {
@@ -133,38 +149,41 @@ export class SCP {
     });
 
     console.log(
-      "the directory transfer was",
-      status ? "successful" : "unsuccessful"
+      `The copy of directory ${local} was ${
+        status ? "successful" : "unsuccessful"
+      }.`
     );
     if (failed.length > 0) {
       console.log("failed transfers", failed.join(", "));
-      await this.putFiles(ssh, failed, concurrency);
+      await this.putMany(failed, async failed => {
+        console.log(`Retrying to copy ${failed.local} to ${failed.remote}.`);
+        await this.putFile(ssh, failed.local, failed.remote, true);
+      });
     }
   }
-  async putFiles(
-    ssh: node_ssh,
-    files: { local: string; remote: string }[],
-    concurrency: number
-  ) {
+
+  async putFile(ssh: node_ssh, local: string, remote: string, verbose = true) {
     try {
-      const status = await ssh.putFiles(files, { concurrency: concurrency });
+      await ssh.putFile(local, remote);
+      if (verbose) {
+        console.log(`✔ Successfully copied file ${local} to remote ${remote}.`);
+      }
     } catch (error) {
+      ssh.dispose();
       console.error(`⚠️ An error happened:(.`, error.message, error.stack);
     }
   }
 
-  @Command("test")
-  async test() {
-    const ssh = await this.connect(
-      "ssh.strato.de",
-      "koelnerhofdernau.de",
-      22,
-      null,
-      "Powerkit2709*",
-      null,
-      null
-    );
+  private isDirectory(path: string) {
+    return fs.existsSync(path) && fs.lstatSync(path).isDirectory();
+  }
 
-    await this.scp(ssh, "node_modules", "test", 3);
+  private async putMany<T>(
+    array: T[],
+    asyncFunction: (item: T) => Promise<any>
+  ) {
+    for (const el of array) {
+      await asyncFunction(el);
+    }
   }
 }

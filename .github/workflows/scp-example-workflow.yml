@@ -21,5 +21,13 @@ jobs:
           host: ${{ secrets.HOST }}
           username: ${{ secrets.SSH_USER }}
           password: ${{ secrets.PASSWORD }}
+      - name: Copy single file to remote
+        uses: garygrossgarten/github-action-scp@release/0.3.0
+        with:
+          local: readme.md
+          remote: ./scp/readme.md
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.SSH_USER }}
+          password: ${{ secrets.PASSWORD }}
         env:
           CI: true

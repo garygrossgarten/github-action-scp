@@ -8,6 +8,18 @@ inputs:
   remote:
     description: "Path on the remote server to copy to."
     required: true
+  concurrency:
+    description: "Number of concurrent file transfers."
+    required: false
+    default: 1
+  recursive:
+    description: "Wether copy of directory should be recursive"
+    required: false
+    default: true
+  verbose:
+    description: "Log status of every file copy"
+    required: false
+    default: true
   host:
     description: "Hostname or IP address of the server."
     required: false
