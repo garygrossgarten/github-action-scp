@@ -29,7 +29,7 @@ const billy_plugin_core_1 = require("@fivethree/billy-plugin-core");
 const billy_plugin_github_actions_1 = require("@garygrossgarten/billy-plugin-github-actions");
 const node_ssh_1 = __importDefault(require("node-ssh"));
 const keyboard_1 = require("./keyboard");
-let SSH = class SSH {
+let SCP = class SCP {
     ssh(local, remote, host = "localhost", username, port = 22, privateKey, password, passphrase, tryKeyboard) {
         return __awaiter(this, void 0, void 0, function* () {
             const ssh = yield this.connect(host, username, port, privateKey, password, passphrase, tryKeyboard);
@@ -67,16 +67,28 @@ let SSH = class SSH {
             const m2 = yield this.colorize("orange", `Starting scp Action:`);
             console.log(`${m2} ${local} to ${remote}`);
             try {
-                yield ssh.putFiles([
-                    {
-                        local: local,
-                        remote: remote
+                const failed = [];
+                const successful = [];
+                const status = yield ssh.putDirectory(local, remote, {
+                    recursive: true,
+                    concurrency: 10,
+                    tick: function (localPath, remotePath, error) {
+                        if (error) {
+                            failed.push(localPath);
+                        }
+                        else {
+                            successful.push(localPath);
+                        }
                     }
-                ]);
+                });
+                ssh.dispose();
+                console.log("the directory transfer was", status ? "successful" : "unsuccessful");
+                console.log("failed transfers", failed.join(", "));
+                console.log("successful transfers", successful.join(", "));
                 console.log("✅ scp Action finished.");
             }
             catch (err) {
-                console.error(`⚠️ An error happened:(.`, err);
+                console.error(`⚠️ An error happened:(.`, err.message, err.stack);
                 process.abort();
             }
         });
@@ -98,8 +110,8 @@ __decorate([
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String, String, Object, String, Object, String, String, String, Boolean]),
     __metadata("design:returntype", Promise)
-], SSH.prototype, "ssh", null);
-SSH = __decorate([
+], SCP.prototype, "ssh", null);
+SCP = __decorate([
     billy_core_1.App()
-], SSH);
-exports.SSH = SSH;
+], SCP);
+exports.SCP = SCP;

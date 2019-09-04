@@ -1,5 +1,12 @@
 #!/usr/bin/env node
-import { App, Hook, onStart, usesPlugins } from "@fivethree/billy-core";
+import {
+  App,
+  Hook,
+  onStart,
+  usesPlugins,
+  Command,
+  param
+} from "@fivethree/billy-core";
 import { CorePlugin } from "@fivethree/billy-plugin-core";
 import {
   GithubActionsPlugin,
@@ -10,9 +17,9 @@ import {
 import node_ssh from "node-ssh";
 import { keyboardFunction } from "./keyboard";
 
-export interface SSH extends CorePlugin, GithubActionsPlugin {}
+export interface SCP extends CorePlugin, GithubActionsPlugin {}
 @App()
-export class SSH {
+export class SCP {
   @usesPlugins(CorePlugin, GithubActionsPlugin)
   @Hook(onStart)
   @GitHubAction()
@@ -83,16 +90,32 @@ export class SSH {
     console.log(`${m2} ${local} to ${remote}`);
 
     try {
-      await ssh.putFiles([
-        {
-          local: local,
-          remote: remote
+      const failed = [];
+      const successful = [];
+      const status = await ssh.putDirectory(local, remote, {
+        recursive: true,
+        concurrency: 10,
+        tick: function(localPath, remotePath, error) {
+          if (error) {
+            failed.push(localPath);
+          } else {
+            successful.push(localPath);
+          }
         }
-      ]);
+      });
+
+      ssh.dispose();
+
+      console.log(
+        "the directory transfer was",
+        status ? "successful" : "unsuccessful"
+      );
+      console.log("failed transfers", failed.join(", "));
+      console.log("successful transfers", successful.join(", "));
 
       console.log("✅ scp Action finished.");
     } catch (err) {
-      console.error(`⚠️ An error happened:(.`, err);
+      console.error(`⚠️ An error happened:(.`, err.message, err.stack);
       process.abort();
     }
   }
