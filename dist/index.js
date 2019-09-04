@@ -125,8 +125,9 @@ let SCP = class SCP {
                 }
             }
             catch (error) {
-                ssh.dispose();
                 console.error(`⚠️ An error happened:(.`, error.message, error.stack);
+                ssh.dispose();
+                process.abort();
             }
         });
     }
