@@ -12,9 +12,9 @@ jobs:
       - name: setup demo
         run: |
           mkdir test
-          touch test/cool.txt
+          touch test/oof.txt
       - name: Copy folder content recursively to remote
-        uses: garygrossgarten/github-action-scp@release/0.2.0
+        uses: garygrossgarten/github-action-scp@release/0.3.0
         with:
           local: test
           remote: ./
