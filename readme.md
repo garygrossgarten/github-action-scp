@@ -1,16 +1,17 @@
-# GitHub Action SSH
+# GitHub Action SCP
 
-Simple GitHub Action to run a command on a remote server using SSH. This is working with the latest [GitHub Actions](https://github.com/features/actions).
+Simple GitHub Action to copy a folder to a remote server using SSH. This is working with the latest [GitHub Actions](https://github.com/features/actions).
 
 ## ✨ Example Usage
 
 **Example using OpenSSH encrypted private key**
 
 ```yml
-- name: ls -a via ssh
-  uses: garygrossgarten/github-action-ssh@release
+- name: copy via scp
+  uses: garygrossgarten/github-action-scp@release
   with:
-    command: ls -a
+    local: www
+    remote: .
     host: ${{ secrets.HOST }}
     username: garygrossgarten
     passphrase: ${{ secrets.PASSPHRASE }}

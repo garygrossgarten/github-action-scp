@@ -30,10 +30,10 @@ const billy_plugin_github_actions_1 = require("@garygrossgarten/billy-plugin-git
 const node_ssh_1 = __importDefault(require("node-ssh"));
 const keyboard_1 = require("./keyboard");
 let SSH = class SSH {
-    ssh(command, host = "localhost", username, port = 22, privateKey, password, passphrase, tryKeyboard) {
+    ssh(local, remote, host = "localhost", username, port = 22, privateKey, password, passphrase, tryKeyboard) {
         return __awaiter(this, void 0, void 0, function* () {
             const ssh = yield this.connect(host, username, port, privateKey, password, passphrase, tryKeyboard);
-            yield this.executeCommand(ssh, command);
+            yield this.scp(ssh, local, remote);
             ssh.dispose();
         });
     }
@@ -62,24 +62,21 @@ let SSH = class SSH {
             return ssh;
         });
     }
-    executeCommand(ssh, command) {
+    scp(ssh, local, remote) {
         return __awaiter(this, void 0, void 0, function* () {
-            const m2 = yield this.colorize("orange", `Executing command:`);
-            console.log(`${m2} ${command}`);
+            const m2 = yield this.colorize("orange", `Starting scp Action:`);
+            console.log(`${m2} ${local} to ${remote}`);
             try {
-                yield ssh.exec(command, [], {
-                    stream: "both",
-                    onStdout(chunk) {
-                        console.log(chunk.toString("utf8"));
-                    },
-                    onStderr(chunk) {
-                        console.log(chunk.toString("utf8"));
+                yield ssh.putFiles([
+                    {
+                        local: local,
+                        remote: remote
                     }
-                });
-                console.log("✅ SSH Action finished.");
+                ]);
+                console.log("✅ scp Action finished.");
             }
             catch (err) {
-                console.error(`⚠️ An error happened executing command ${command}.`, err);
+                console.error(`⚠️ An error happened:(.`, err);
                 process.abort();
             }
         });
@@ -89,16 +86,17 @@ __decorate([
     billy_core_1.usesPlugins(billy_plugin_core_1.CorePlugin, billy_plugin_github_actions_1.GithubActionsPlugin),
     billy_core_1.Hook(billy_core_1.onStart),
     billy_plugin_github_actions_1.GitHubAction(),
-    __param(0, billy_plugin_github_actions_1.input("command")),
-    __param(1, billy_plugin_github_actions_1.input("host")),
-    __param(2, billy_plugin_github_actions_1.input("username")),
-    __param(3, billy_plugin_github_actions_1.input("port")),
-    __param(4, billy_plugin_github_actions_1.input("privateKey")),
-    __param(5, billy_plugin_github_actions_1.input("password")),
-    __param(6, billy_plugin_github_actions_1.input("passphrase")),
-    __param(7, billy_plugin_github_actions_1.input("tryKeyboard")),
+    __param(0, billy_plugin_github_actions_1.input("local")),
+    __param(1, billy_plugin_github_actions_1.input("remote")),
+    __param(2, billy_plugin_github_actions_1.input("host")),
+    __param(3, billy_plugin_github_actions_1.input("username")),
+    __param(4, billy_plugin_github_actions_1.input("port")),
+    __param(5, billy_plugin_github_actions_1.input("privateKey")),
+    __param(6, billy_plugin_github_actions_1.input("password")),
+    __param(7, billy_plugin_github_actions_1.input("passphrase")),
+    __param(8, billy_plugin_github_actions_1.input("tryKeyboard")),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, Object, String, Object, String, String, String, Boolean]),
+    __metadata("design:paramtypes", [String, String, Object, String, Object, String, String, String, Boolean]),
     __metadata("design:returntype", Promise)
 ], SSH.prototype, "ssh", null);
 SSH = __decorate([

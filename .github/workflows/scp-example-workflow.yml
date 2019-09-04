@@ -1,16 +1,19 @@
 name: Command via SSH
 
-on: push
+on:
+  push:
+    branches: master
 
 jobs:
   build:
     runs-on: ubuntu-latest
 
     steps:
-      - name: ls -a via OPEN SSH Private Key
-        uses: garygrossgarten/github-action-ssh@release
+      - name: copy via SSH
+        uses: garygrossgarten/github-action-scp@release
         with:
-          command: ls -a
+          local: www
+          remote: .
           host: ${{ secrets.HOST }}
           username: garygrossgarten
           passphrase: ${{ secrets.PASSPHRASE }}
