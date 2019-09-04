@@ -1,7 +1,7 @@
 {
-  "name": "@garygrossgarten/github-action-ssh",
-  "version": "0.3.0",
-  "description": "Run commands on a remote server via SSH.",
+  "name": "@garygrossgarten/github-action-scp",
+  "version": "0.1.0",
+  "description": "Copy a folder to a remote server using SSH.",
   "repository": {
     "type": "git",
     "url": "https://github.com/garygrossgarten/github-action-ssh"

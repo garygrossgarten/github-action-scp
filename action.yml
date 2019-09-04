@@ -1,9 +1,12 @@
-name: Run SSH command
+name: Copy via ssh
 author: garygrossgarten
-description: Github Action to run commands on a remote server using SSH
+description: Github Action to copy a folder to a remote server using SSH
 inputs:
-  command:
-    description: "Command to execute on the remote server."
+  local:
+    description: "Path to the local folder you want to copy."
+    required: true
+  remote:
+    description: "Path on the remote server to copy to."
     required: true
   host:
     description: "Hostname or IP address of the server."
@@ -33,4 +36,4 @@ runs:
   main: "dist/index.js"
 branding:
   color: "purple"
-  icon: "lock"
+  icon: "copy"

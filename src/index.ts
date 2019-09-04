@@ -17,7 +17,8 @@ export class SSH {
   @Hook(onStart)
   @GitHubAction()
   async ssh(
-    @input("command") command: string,
+    @input("local") local: string,
+    @input("remote") remote: string,
     @input("host") host = "localhost",
     @input("username") username: string,
     @input("port") port = 22,
@@ -36,7 +37,7 @@ export class SSH {
       tryKeyboard
     );
 
-    await this.executeCommand(ssh, command);
+    await this.scp(ssh, local, remote);
 
     ssh.dispose();
   }
@@ -77,24 +78,21 @@ export class SSH {
     return ssh;
   }
 
-  private async executeCommand(ssh: node_ssh, command: string) {
-    const m2 = await this.colorize("orange", `Executing command:`);
-    console.log(`${m2} ${command}`);
+  private async scp(ssh: node_ssh, local: string, remote: string) {
+    const m2 = await this.colorize("orange", `Starting scp Action:`);
+    console.log(`${m2} ${local} to ${remote}`);
 
     try {
-      await ssh.exec(command, [], {
-        stream: "both",
-        onStdout(chunk) {
-          console.log(chunk.toString("utf8"));
-        },
-        onStderr(chunk) {
-          console.log(chunk.toString("utf8"));
+      await ssh.putFiles([
+        {
+          local: local,
+          remote: remote
         }
-      });
+      ]);
 
-      console.log("✅ SSH Action finished.");
+      console.log("✅ scp Action finished.");
     } catch (err) {
-      console.error(`⚠️ An error happened executing command ${command}.`, err);
+      console.error(`⚠️ An error happened:(.`, err);
       process.abort();
     }
   }
