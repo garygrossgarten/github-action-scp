@@ -28,6 +28,10 @@ Check out [the workflow example](.github/workflows/scp-example-workflow.yml) for
 
 ## Options
 
+- **local** - _string_ - Path to local folder you want to copy. **required**
+
+- **remote** - _string_ - Path to folder to copy the contents to. **required**
+
 - **host** - _string_ - Hostname or IP address of the server. **Default:** `'localhost'`
 
 - **port** - _integer_ - Port number of the server. **Default:** `22`
