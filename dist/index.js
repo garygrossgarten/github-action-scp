@@ -65,7 +65,6 @@ let SCP = class SCP {
     }
     scp(ssh, local, remote, concurrency, verbose = true, recursive = true) {
         return __awaiter(this, void 0, void 0, function* () {
-            console.log("scp", { local }, { remote }, { concurrency }, { verbose }, { recursive });
             const m2 = yield this.colorize("orange", `Starting scp Action:`);
             console.log(`${m2} ${local} to ${remote}`);
             try {
