@@ -14,7 +14,7 @@ jobs:
           mkdir test
           touch test/oof.txt
       - name: Copy folder content recursively to remote
-        uses: garygrossgarten/github-action-scp@test/0.5.2
+        uses: garygrossgarten/github-action-scp@test/0.5.3
         with:
           local: test
           remote: scp/directory
