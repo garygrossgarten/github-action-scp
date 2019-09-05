@@ -1,6 +1,6 @@
 # GitHub Action SCP
 
-Simple GitHub Action to copy a folder orr single file to a remote server using SSH. This is working with the latest [GitHub Actions](https://github.com/features/actions).
+Simple GitHub Action to copy a folder or single file to a remote server using SSH. This is working with the latest [GitHub Actions](https://github.com/features/actions).
 
 ## ✨ Example Usage
 
