@@ -49,7 +49,7 @@ Check out [the workflow example](.github/workflows/scp-example-workflow.yml) for
 - **concurrency** - _number_ - Number of concurrent file transfers. **Default:** `1`
 
 - **recursive** - _boolean_ - Copy directory contents recursively. **Default:** `true`
--
+
 - **verbose** - _boolean_ - Output every single file transfer status. **Default:** `true`
 
 - **host** - _string_ - Hostname or IP address of the server. **Default:** `'localhost'`
