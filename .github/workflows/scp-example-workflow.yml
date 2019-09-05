@@ -2,7 +2,10 @@ name: scp copy folder to remote via SSH
 
 on:
   push:
-    branch: master
+    branches:
+      - master
+      - release/*
+      - test/*
 
 jobs:
   build:
@@ -22,7 +25,7 @@ jobs:
           username: ${{ secrets.SSH_USER }}
           password: ${{ secrets.PASSWORD }}
       - name: Copy single file to remote
-        uses: garygrossgarten/github-action-scp@test/0.5.2
+        uses: garygrossgarten/github-action-scp@test/0.5.3
         with:
           local: test/oof.txt
           remote: scp/single/readme.md

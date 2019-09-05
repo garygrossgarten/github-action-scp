@@ -96,14 +96,6 @@ export class SCP {
     verbose = true,
     recursive = true
   ) {
-    console.log(
-      "scp",
-      { local },
-      { remote },
-      { concurrency },
-      { verbose },
-      { recursive }
-    );
     const m2 = await this.colorize("orange", `Starting scp Action:`);
     console.log(`${m2} ${local} to ${remote}`);
 
