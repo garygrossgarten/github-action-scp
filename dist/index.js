@@ -65,10 +65,11 @@ let SCP = class SCP {
     }
     scp(ssh, local, remote, concurrency, verbose = true, recursive = true) {
         return __awaiter(this, void 0, void 0, function* () {
+            console.log("scp", { local }, { remote }, { concurrency }, { verbose }, { recursive });
             const m2 = yield this.colorize("orange", `Starting scp Action:`);
             console.log(`${m2} ${local} to ${remote}`);
             try {
-                if (this.isDirectory("dist")) {
+                if (this.isDirectory(local)) {
                     yield this.putDirectory(ssh, local, remote, concurrency, verbose, recursive);
                 }
                 else {
@@ -143,7 +144,6 @@ let SCP = class SCP {
     }
     test() {
         return __awaiter(this, void 0, void 0, function* () {
-            console.log(process.env);
             const ssh = yield this.connect(process.env.HOST, process.env.SSH_USER, 22, null, process.env.PW, null, null);
             yield this.scp(ssh, "dist", "scp/directory", 1, true, true);
         });
