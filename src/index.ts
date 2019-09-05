@@ -190,7 +190,6 @@ export class SCP {
 
   @Command("test")
   async test() {
-    console.log(process.env);
     const ssh = await this.connect(
       process.env.HOST,
       process.env.SSH_USER,
