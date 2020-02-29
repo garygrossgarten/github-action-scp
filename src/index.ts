@@ -35,7 +35,8 @@ export class SCP {
     @input("privateKey") privateKey: string,
     @input("password") password: string,
     @input("passphrase") passphrase: string,
-    @input("tryKeyboard") tryKeyboard: boolean
+    @input("tryKeyboard") tryKeyboard: boolean,
+    @input("localSeparator") localSeparator: string
   ) {
     const ssh = await this.connect(
       host,
@@ -47,7 +48,14 @@ export class SCP {
       tryKeyboard
     );
 
-    await this.scp(ssh, local, remote, concurrency, verbose, recursive);
+    if(typeof localSeparator!='undefined' && localSeparator){
+      local.split(localSeparator).forEach(function (item) {  
+        await this.scp(ssh, item, remote, concurrency, verbose, recursive);
+      }); 
+    }
+    else{
+      await this.scp(ssh, local, remote, concurrency, verbose, recursive);
+    }
 
     ssh.dispose();
   }
