@@ -49,15 +49,20 @@ export class SCP {
     );
 
     if(typeof localSeparator!='undefined' && localSeparator){
-      local.split(localSeparator).forEach(function (item) {  
+      var nbCompletedCopies=0;
+      var locals=local.split(localSeparator);
+      locals.forEach(async function (item) {
         await this.scp(ssh, item, remote, concurrency, verbose, recursive);
+        nbCompletedCopies++;
+        if(nbCompletedCopies==locals.length){
+          ssh.dispose();
+        }
       }); 
     }
     else{
       await this.scp(ssh, local, remote, concurrency, verbose, recursive);
+      ssh.dispose();
     }
-
-    ssh.dispose();
   }
 
   private async connect(

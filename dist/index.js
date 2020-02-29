@@ -31,11 +31,26 @@ const fs_1 = __importDefault(require("fs"));
 const node_ssh_1 = __importDefault(require("node-ssh"));
 const keyboard_1 = require("./keyboard");
 let SCP = class SCP {
-    ssh(local, remote, concurrency = 1, recursive = true, verbose = true, host = "localhost", username, port = 22, privateKey, password, passphrase, tryKeyboard) {
+    ssh(local, remote, concurrency = 1, recursive = true, verbose = true, host = "localhost", username, port = 22, privateKey, password, passphrase, tryKeyboard, localSeparator) {
         return __awaiter(this, void 0, void 0, function* () {
             const ssh = yield this.connect(host, username, port, privateKey, password, passphrase, tryKeyboard);
-            yield this.scp(ssh, local, remote, concurrency, verbose, recursive);
-            ssh.dispose();
+            if (typeof localSeparator != 'undefined' && localSeparator) {
+                var nbCompletedCopies = 0;
+                var locals = local.split(localSeparator);
+                locals.forEach(function (item) {
+                    return __awaiter(this, void 0, void 0, function* () {
+                        yield this.scp(ssh, item, remote, concurrency, verbose, recursive);
+                        nbCompletedCopies++;
+                        if (nbCompletedCopies == locals.length) {
+                            ssh.dispose();
+                        }
+                    });
+                });
+            }
+            else {
+                yield this.scp(ssh, local, remote, concurrency, verbose, recursive);
+                ssh.dispose();
+            }
         });
     }
     connect(host = "localhost", username, port = 22, privateKey, password, passphrase, tryKeyboard) {
@@ -164,8 +179,9 @@ __decorate([
     __param(9, billy_plugin_github_actions_1.input("password")),
     __param(10, billy_plugin_github_actions_1.input("passphrase")),
     __param(11, billy_plugin_github_actions_1.input("tryKeyboard")),
+    __param(12, billy_plugin_github_actions_1.input("localSeparator")),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, String, Object, Object, Object, Object, String, Object, String, String, String, Boolean]),
+    __metadata("design:paramtypes", [String, String, Object, Object, Object, Object, String, Object, String, String, String, Boolean, String]),
     __metadata("design:returntype", Promise)
 ], SCP.prototype, "ssh", null);
 __decorate([

@@ -5,7 +5,7 @@ import node_ssh from "node-ssh";
 export interface SCP extends CorePlugin, GithubActionsPlugin {
 }
 export declare class SCP {
-    ssh(local: string, remote: string, concurrency: number, recursive: boolean, verbose: boolean, host: string, username: string, port: number, privateKey: string, password: string, passphrase: string, tryKeyboard: boolean): Promise<void>;
+    ssh(local: string, remote: string, concurrency: number, recursive: boolean, verbose: boolean, host: string, username: string, port: number, privateKey: string, password: string, passphrase: string, tryKeyboard: boolean, localSeparator: string): Promise<void>;
     private connect;
     private scp;
     putDirectory(ssh: node_ssh, local: string, remote: string, concurrency?: number, verbose?: boolean, recursive?: boolean): Promise<void>;
