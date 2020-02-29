@@ -1,6 +1,6 @@
 name: Copy via ssh
 author: garygrossgarten
-description: Github Action to copy a folder to a remote server using SSH
+description: Github Action to copy files or folders to a remote server using SSH
 inputs:
   local:
     description: "Path to the local folder you want to copy."
@@ -42,6 +42,9 @@ inputs:
     required: false
   tryKeyboard:
     description: "Try keyboard-interactive user authentication if primary user authentication method fails."
+    required: false
+  localSeparator:
+    description: "If set, local is split by this separator to copy multiple files/folders."
     required: false
 runs:
   using: "node12"
