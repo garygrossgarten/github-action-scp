@@ -1,6 +1,6 @@
 # GitHub Action SCP
 
-Simple GitHub Action to copy a folder or single file to a remote server using SSH. This is working with the latest [GitHub Actions](https://github.com/features/actions).
+Simple GitHub Action to copy folders or files to a remote server using SSH. This is working with the latest [GitHub Actions](https://github.com/features/actions).
 
 ## ✨ Example Usage
 
@@ -29,6 +29,21 @@ Simple GitHub Action to copy a folder or single file to a remote server using SS
           host: ${{ secrets.HOST }}
           username: ${{ secrets.SSH_USER }}
           password: ${{ secrets.PASSWORD }}
+
+```
+
+**Copy multiple files/folders to a remote server**
+
+```yml
+- name: Copy multiple files/folders to remote
+        uses: garygrossgarten/github-action-scp@release
+        with:
+          local: test/oof.txt,test/foo
+          remote: scp/single/oof.txt
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.SSH_USER }}
+          password: ${{ secrets.PASSWORD }}
+          localSeparator: ,
 
 ```
 
@@ -65,6 +80,8 @@ Check out [the workflow example](.github/workflows/scp-example-workflow.yml) for
 - **passphrase** - _string_ - For an encrypted private key, this is the passphrase used to decrypt it. **Default:** (none)
 
 - **tryKeyboard** - _boolean_ - Try keyboard-interactive user authentication if primary user authentication method fails. **Default:** `false`
+
+- **localSeparator** - _string_ - If set, local is split by this separator to copy multiple files/folders. **Default:** (none)
 
 ## Development
 
