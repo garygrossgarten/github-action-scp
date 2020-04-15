@@ -1,17 +1,14 @@
 {
   "name": "@garygrossgarten/github-action-scp",
-  "version": "0.6.1",
-  "description": "Copy a files or folders to a remote server using SSH.",
+  "version": "0.5.4",
+  "description": "Copy files or folders to a remote server using SSH.",
   "repository": {
     "type": "git",
     "url": "https://github.com/garygrossgarten/github-action-ssh"
   },
-  "main": "lib/index.js",
+  "main": "dist/index.js",
   "scripts": {
-    "build": "tsc",
-    "format": "prettier --write **/*.ts",
-    "format-check": "prettier --check **/*.ts",
-    "pack": "ncc build"
+    "build": "node_modules/.bin/tsc -p ."
   },
   "bin": {
     "github-action-ssh": "dist/index.js"
@@ -26,14 +23,19 @@
   ],
   "author": "garygrossgarten",
   "license": "MIT",
-  "dependencies": {
-    "@actions/core": "^1.2.0",
-    "node-ssh": "^8.0.0"
-  },
   "devDependencies": {
-    "@types/node": "^12.7.12",
-    "@zeit/ncc": "^0.20.5",
-    "prettier": "^1.19.1",
-    "typescript": "3.8.3"
-  }
+    "@types/node": "^10.12.18",
+    "nodemon": "^1.18.9",
+    "ts-node": "^7.0.1",
+    "typescript": "^3.2.2"
+  },
+  "dependencies": {
+    "@fivethree/billy-core": "0.18.0",
+    "@fivethree/billy-plugin-core": "0.18.0",
+    "@garygrossgarten/billy-plugin-github-actions": "0.5.0",
+    "node-ssh": "~6.0.0"
+  },
+  "files": [
+    "dist"
+  ]
 }
