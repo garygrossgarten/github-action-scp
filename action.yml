@@ -46,6 +46,9 @@ inputs:
   localSeparator:
     description: "If set, local is split by this separator to copy multiple files/folders."
     required: false
+  options:
+    description: "Additional options to scp command such as for example ' -p ' to preserve modification times, access times, and modes from the original file."
+    required: false
 runs:
   using: "node12"
   main: "dist/index.js"

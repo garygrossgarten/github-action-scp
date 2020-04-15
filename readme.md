@@ -39,7 +39,7 @@ Simple GitHub Action to copy folders or files to a remote server using SSH. This
         uses: garygrossgarten/github-action-scp@release
         with:
           local: test/oof.txt,test/foo
-          remote: scp/single/oof.txt
+          remote: scp/directory
           host: ${{ secrets.HOST }}
           username: ${{ secrets.SSH_USER }}
           password: ${{ secrets.PASSWORD }}
@@ -82,6 +82,8 @@ Check out [the workflow example](.github/workflows/scp-example-workflow.yml) for
 - **tryKeyboard** - _boolean_ - Try keyboard-interactive user authentication if primary user authentication method fails. **Default:** `false`
 
 - **localSeparator** - _string_ - If set, local is split by this separator to copy multiple files/folders. **Default:** (none)
+
+- **options** - _string_ - Additional options to scp command such as for example " -p " to preserve modification times, access times, and modes from the original file. **Default:** (none)
 
 ## Development
 
