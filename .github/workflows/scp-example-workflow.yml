@@ -1,11 +1,7 @@
 name: scp copy folder to remote via SSH
 
 on:
-  push:
-    branches:
-      - master
-      - release/*
-      - test/*
+  push
 
 jobs:
   build:
