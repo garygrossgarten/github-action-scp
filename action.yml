@@ -8,6 +8,9 @@ inputs:
   remote:
     description: "Path on the remote server to copy to."
     required: true
+  rmRemote:
+    description: "If it is a directory, remote files in it will be deleted before the copy is started."
+    required: false
   concurrency:
     description: "Number of concurrent file transfers."
     required: false
