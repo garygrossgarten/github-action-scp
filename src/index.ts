@@ -1,5 +1,6 @@
 import * as core from '@actions/core';
 import node_ssh from 'node-ssh';
+import fsPath from 'path';
 import fs from "fs";
 import {keyboardFunction} from './keyboard';
 
@@ -15,6 +16,7 @@ async function run() {
   const recursive: boolean = !!core.getInput('recursive') || true;
   const concurrency: number = +core.getInput('concurrency') || 1;
   const local: string = core.getInput('local');
+  const dotfiles: boolean = core.getInput('dotfiles') === 'true';
   const remote: string = core.getInput('remote');
 
   try {
@@ -27,7 +29,7 @@ async function run() {
       passphrase,
       tryKeyboard
     );
-    await scp(ssh, local, remote, concurrency, verbose, recursive);
+    await scp(ssh, local, remote, dotfiles, concurrency, verbose, recursive);
 
     ssh.dispose();
   } catch (err) {
@@ -71,6 +73,7 @@ async function scp(
   ssh: node_ssh,
   local: string,
   remote: string,
+  dotfiles = false,
   concurrency: number,
   verbose = true,
   recursive = true
@@ -79,7 +82,7 @@ async function scp(
 
   try {
     if (isDirectory(local)) {
-      await putDirectory(ssh, local, remote, concurrency, verbose, recursive);
+      await putDirectory(ssh, local, remote, dotfiles, concurrency, verbose, recursive);
     } else {
       await putFile(ssh, local, remote, verbose);
     }
@@ -95,6 +98,7 @@ async function putDirectory(
   ssh: node_ssh,
   local: string,
   remote: string,
+  dotfiles= false,
   concurrency = 3,
   verbose = false,
   recursive = true
@@ -104,6 +108,7 @@ async function putDirectory(
   const status = await ssh.putDirectory(local, remote, {
     recursive: recursive,
     concurrency: concurrency,
+    validate: (path: string) => !fsPath.basename(path).startsWith('.') || dotfiles,
     tick: function(localPath, remotePath, error) {
       if (error) {
         if (verbose) {
