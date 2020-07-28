@@ -60,6 +60,8 @@ Check out [the workflow example](.github/workflows/scp-example-workflow.yml) for
 
 - **password** - _string_ - Password for password-based user authentication. **Default:** (none)
 
+- **dotfiles** - _boolean_ - Include files with a leading `.` e.g. `.htaccess` **Default:** `false`
+
 - **privateKey** - _mixed_ - _Buffer_ or _string_ that contains a private key for either key-based or hostbased user authentication (OpenSSH format). **Default:** (none)
 
 - **passphrase** - _string_ - For an encrypted private key, this is the passphrase used to decrypt it. **Default:** (none)
