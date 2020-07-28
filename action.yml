@@ -8,6 +8,10 @@ inputs:
   remote:
     description: "Path on the remote server to copy to."
     required: true
+  dotfiles:
+    description: "Determines if files with  leading dot (.) on folder copy is included"
+    required: false
+    default: false
   concurrency:
     description: "Number of concurrent file transfers."
     required: false
