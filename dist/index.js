@@ -9236,8 +9236,10 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const core = __importStar(__webpack_require__(470));
 const node_ssh_1 = __importDefault(__webpack_require__(818));
+const ssh2_streams_1 = __webpack_require__(139);
 const fs_1 = __importDefault(__webpack_require__(747));
 const keyboard_1 = __webpack_require__(708);
+const path_1 = __importDefault(__webpack_require__(622));
 function run() {
     return __awaiter(this, void 0, void 0, function* () {
         const host = core.getInput('host') || 'localhost';
@@ -9252,6 +9254,25 @@ function run() {
         const concurrency = +core.getInput('concurrency') || 1;
         const local = core.getInput('local');
         const remote = core.getInput('remote');
+        const atomicPut = core.getInput('atomicPut');
+        if (atomicPut) {
+            // patch SFTPStream to atomically rename files
+            const originalFastPut = ssh2_streams_1.SFTPStream.prototype.fastPut;
+            ssh2_streams_1.SFTPStream.prototype.fastPut = function (localPath, remotePath, opts, cb) {
+                const parsedPath = path_1.default.posix.parse(remotePath);
+                parsedPath.base = '.' + parsedPath.base;
+                const tmpRemotePath = path_1.default.posix.format(parsedPath);
+                const that = this;
+                originalFastPut.apply(this, [localPath, tmpRemotePath, opts, function (error, result) {
+                        if (error) {
+                            cb(error, result);
+                        }
+                        else {
+                            that.ext_openssh_rename(tmpRemotePath, remotePath, cb);
+                        }
+                    }]);
+            };
+        }
         try {
             const ssh = yield connect(host, username, port, privateKey, password, passphrase, tryKeyboard);
             yield scp(ssh, local, remote, concurrency, verbose, recursive);
@@ -18457,7 +18478,7 @@ exports.keyboardFunction = password => (name, instructions, instructionsLang, pr
 /***/ 724:
 /***/ (function(module) {
 
-module.exports = {"_from":"ssh2-streams@~0.4.10","_id":"ssh2-streams@0.4.10","_inBundle":false,"_integrity":"sha512-8pnlMjvnIZJvmTzUIIA5nT4jr2ZWNNVHwyXfMGdRJbug9TpI3kd99ffglgfSWqujVv/0gxwMsDn9j9RVst8yhQ==","_location":"/ssh2-streams","_phantomChildren":{},"_requested":{"type":"range","registry":true,"raw":"ssh2-streams@~0.4.10","name":"ssh2-streams","escapedName":"ssh2-streams","rawSpec":"~0.4.10","saveSpec":null,"fetchSpec":"~0.4.10"},"_requiredBy":["/ssh2"],"_resolved":"https://registry.npmjs.org/ssh2-streams/-/ssh2-streams-0.4.10.tgz","_shasum":"48ef7e8a0e39d8f2921c30521d56dacb31d23a34","_spec":"ssh2-streams@~0.4.10","_where":"/Users/garygrossgarten/Dev/things/github-action-scp/node_modules/ssh2","author":{"name":"Brian White","email":"mscdex@mscdex.net"},"bugs":{"url":"https://github.com/mscdex/ssh2-streams/issues"},"bundleDependencies":false,"dependencies":{"asn1":"~0.2.0","bcrypt-pbkdf":"^1.0.2","streamsearch":"~0.1.2"},"deprecated":false,"description":"SSH2 and SFTP(v3) client/server protocol streams for node.js","engines":{"node":">=5.2.0"},"homepage":"https://github.com/mscdex/ssh2-streams#readme","keywords":["ssh","ssh2","sftp","secure","protocol","streams","client","server"],"licenses":[{"type":"MIT","url":"http://github.com/mscdex/ssh2-streams/raw/master/LICENSE"}],"main":"./index","name":"ssh2-streams","repository":{"type":"git","url":"git+ssh://git@github.com/mscdex/ssh2-streams.git"},"scripts":{"test":"node test/test.js"},"version":"0.4.10"};
+module.exports = {"_args":[["ssh2-streams@0.4.10","/home/virtuald/src/frc/github-action-scp"]],"_from":"ssh2-streams@0.4.10","_id":"ssh2-streams@0.4.10","_inBundle":false,"_integrity":"sha512-8pnlMjvnIZJvmTzUIIA5nT4jr2ZWNNVHwyXfMGdRJbug9TpI3kd99ffglgfSWqujVv/0gxwMsDn9j9RVst8yhQ==","_location":"/ssh2-streams","_phantomChildren":{},"_requested":{"type":"version","registry":true,"raw":"ssh2-streams@0.4.10","name":"ssh2-streams","escapedName":"ssh2-streams","rawSpec":"0.4.10","saveSpec":null,"fetchSpec":"0.4.10"},"_requiredBy":["/ssh2"],"_resolved":"https://registry.npmjs.org/ssh2-streams/-/ssh2-streams-0.4.10.tgz","_spec":"0.4.10","_where":"/home/virtuald/src/frc/github-action-scp","author":{"name":"Brian White","email":"mscdex@mscdex.net"},"bugs":{"url":"https://github.com/mscdex/ssh2-streams/issues"},"dependencies":{"asn1":"~0.2.0","bcrypt-pbkdf":"^1.0.2","streamsearch":"~0.1.2"},"description":"SSH2 and SFTP(v3) client/server protocol streams for node.js","engines":{"node":">=5.2.0"},"homepage":"https://github.com/mscdex/ssh2-streams#readme","keywords":["ssh","ssh2","sftp","secure","protocol","streams","client","server"],"licenses":[{"type":"MIT","url":"http://github.com/mscdex/ssh2-streams/raw/master/LICENSE"}],"main":"./index","name":"ssh2-streams","repository":{"type":"git","url":"git+ssh://git@github.com/mscdex/ssh2-streams.git"},"scripts":{"test":"node test/test.js"},"version":"0.4.10"};
 
 /***/ }),
 
