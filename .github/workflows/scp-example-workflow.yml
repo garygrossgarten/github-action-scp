@@ -21,7 +21,7 @@ jobs:
           remote: scp/directory
           host: ${{ secrets.HOST }}
           username: ${{ secrets.SSH_USER }}
-          password: ${{ secrets.PASSPHRASE }}
+          password: ${{ secrets.PASSWORD }}
           privateKey: ${{ secrets.PRIVATE_KEY}}
       - name: Copy folder content recursively to remote (clean directory)
         uses: ./
@@ -30,7 +30,7 @@ jobs:
           remote: scp/directory
           host: ${{ secrets.HOST }}
           username: ${{ secrets.SSH_USER }}
-          password: ${{ secrets.PASSPHRASE }}
+          password: ${{ secrets.PASSWORD }}
           privateKey: ${{ secrets.PRIVATE_KEY}}
           rmRemote: true  
       - name: Copy single file to remote
@@ -40,7 +40,7 @@ jobs:
           remote: scp/single/readme.md
           host: ${{ secrets.HOST }}
           username: ${{ secrets.SSH_USER }}
-          password: ${{ secrets.PASSPHRASE }}
+          password: ${{ secrets.PASSWORD }}
           privateKey: ${{ secrets.PRIVATE_KEY}}
         env:
           CI: true
