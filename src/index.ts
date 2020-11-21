@@ -1,7 +1,8 @@
 import * as core from '@actions/core';
 import node_ssh from 'node-ssh';
+
 import fsPath from 'path';
-import fs from "fs";
+import fs from 'fs';
 import {keyboardFunction} from './keyboard';
 
 async function run() {
@@ -18,6 +19,7 @@ async function run() {
   const local: string = core.getInput('local');
   const dotfiles: boolean = !!core.getInput('dotfiles') || true;
   const remote: string = core.getInput('remote');
+  const rmRemote: boolean = !!core.getInput('rmRemote') || false;
 
   try {
     const ssh = await connect(
@@ -29,7 +31,17 @@ async function run() {
       passphrase,
       tryKeyboard
     );
-    await scp(ssh, local, remote, dotfiles, concurrency, verbose, recursive);
+
+    await scp(
+      ssh,
+      local,
+      remote,
+      dotfiles,
+      concurrency,
+      verbose,
+      recursive,
+      rmRemote
+    );
 
     ssh.dispose();
   } catch (err) {
@@ -76,13 +88,25 @@ async function scp(
   dotfiles = false,
   concurrency: number,
   verbose = true,
-  recursive = true
+  recursive = true,
+  rmRemote = false
 ) {
   console.log(`Starting scp Action: ${local} to ${remote}`);
 
   try {
     if (isDirectory(local)) {
-      await putDirectory(ssh, local, remote, dotfiles, concurrency, verbose, recursive);
+      if (rmRemote) {
+        await cleanDirectory(ssh, remote);
+      }
+      await putDirectory(
+        ssh,
+        local,
+        remote,
+        dotfiles,
+        concurrency,
+        verbose,
+        recursive
+      );
     } else {
       await putFile(ssh, local, remote, verbose);
     }
@@ -98,7 +122,7 @@ async function putDirectory(
   ssh: node_ssh,
   local: string,
   remote: string,
-  dotfiles= false,
+  dotfiles = false,
   concurrency = 3,
   verbose = false,
   recursive = true
@@ -108,7 +132,8 @@ async function putDirectory(
   const status = await ssh.putDirectory(local, remote, {
     recursive: recursive,
     concurrency: concurrency,
-    validate: (path: string) => !fsPath.basename(path).startsWith('.') || dotfiles,
+    validate: (path: string) =>
+      !fsPath.basename(path).startsWith('.') || dotfiles,
     tick: function(localPath, remotePath, error) {
       if (error) {
         if (verbose) {
@@ -129,12 +154,25 @@ async function putDirectory(
       status ? 'successful' : 'unsuccessful'
     }.`
   );
+
   if (failed.length > 0) {
     console.log('failed transfers', failed.join(', '));
     await putMany(failed, async failed => {
       console.log(`Retrying to copy ${failed.local} to ${failed.remote}.`);
       await putFile(ssh, failed.local, failed.remote, true);
     });
+  }
+}
+
+async function cleanDirectory(ssh: node_ssh, remote: string, verbose = true) {
+  try {
+    await ssh.execCommand(`rm -rf ${remote}/*`);
+    if (verbose) {
+      console.log(`✔ Successfully deleted all files of ${remote}.`);
+    }
+  } catch (error) {
+    console.error(`⚠️ An error happened:(.`, error.message, error.stack);
+    ssh.dispose();
   }
 }
 
