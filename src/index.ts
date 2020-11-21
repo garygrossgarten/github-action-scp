@@ -16,7 +16,7 @@ async function run() {
   const recursive: boolean = !!core.getInput('recursive') || true;
   const concurrency: number = +core.getInput('concurrency') || 1;
   const local: string = core.getInput('local');
-  const dotfiles: boolean = core.getInput('dotfiles') === 'true';
+  const dotfiles: boolean = !!core.getInput('dotfiles') || true;
   const remote: string = core.getInput('remote');
 
   try {
