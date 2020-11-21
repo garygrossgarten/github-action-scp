@@ -9237,8 +9237,10 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const core = __importStar(__webpack_require__(470));
 const node_ssh_1 = __importDefault(__webpack_require__(818));
 const path_1 = __importDefault(__webpack_require__(622));
+const ssh2_streams_1 = __webpack_require__(139);
 const fs_1 = __importDefault(__webpack_require__(747));
 const keyboard_1 = __webpack_require__(708);
+const path_2 = __importDefault(__webpack_require__(622));
 function run() {
     return __awaiter(this, void 0, void 0, function* () {
         const host = core.getInput('host') || 'localhost';
@@ -9255,6 +9257,30 @@ function run() {
         const dotfiles = !!core.getInput('dotfiles') || true;
         const remote = core.getInput('remote');
         const rmRemote = !!core.getInput('rmRemote') || false;
+        const atomicPut = core.getInput('atomicPut');
+        if (atomicPut) {
+            // patch SFTPStream to atomically rename files
+            const originalFastPut = ssh2_streams_1.SFTPStream.prototype.fastPut;
+            ssh2_streams_1.SFTPStream.prototype.fastPut = function (localPath, remotePath, opts, cb) {
+                const parsedPath = path_2.default.posix.parse(remotePath);
+                parsedPath.base = '.' + parsedPath.base;
+                const tmpRemotePath = path_2.default.posix.format(parsedPath);
+                const that = this;
+                originalFastPut.apply(this, [
+                    localPath,
+                    tmpRemotePath,
+                    opts,
+                    function (error, result) {
+                        if (error) {
+                            cb(error, result);
+                        }
+                        else {
+                            that.ext_openssh_rename(tmpRemotePath, remotePath, cb);
+                        }
+                    }
+                ]);
+            };
+        }
         try {
             const ssh = yield connect(host, username, port, privateKey, password, passphrase, tryKeyboard);
             yield scp(ssh, local, remote, dotfiles, concurrency, verbose, recursive, rmRemote);

@@ -50,6 +50,10 @@ inputs:
   tryKeyboard:
     description: "Try keyboard-interactive user authentication if primary user authentication method fails."
     required: false
+  atomicPut:
+    description: "Upload files to temporary file first, then rename once upload completed"
+    required: false
+    default: false
 runs:
   using: "node12"
   main: "dist/index.js"
