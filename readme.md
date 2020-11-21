@@ -69,6 +69,7 @@ Check out [the workflow example](.github/workflows/scp-example-workflow.yml) for
 - **tryKeyboard** - _boolean_ - Try keyboard-interactive user authentication if primary user authentication method fails. **Default:** `false`
 
 - **atomicPut** - _boolean_ - Upload files to temporary file first, then rename once upload completed. **Default:** `false`
+- **rmRemote** - _boolean_ - Clean directory before uploading. **Default:** `false`
 
 ## Development
 
