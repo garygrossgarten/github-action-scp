@@ -1,5 +1,5 @@
 import * as core from '@actions/core';
-import node_ssh from 'node-ssh';
+import {NodeSSH} from 'node-ssh';
 import fsPath from 'path';
 import {SFTPStream} from 'ssh2-streams';
 import fs from 'fs';
@@ -26,7 +26,7 @@ async function run() {
   if (atomicPut) {
     // patch SFTPStream to atomically rename files
     const originalFastPut = SFTPStream.prototype.fastPut;
-    SFTPStream.prototype.fastPut = function(localPath, remotePath, opts, cb) {
+    SFTPStream.prototype.fastPut = function (localPath, remotePath, opts, cb) {
       const parsedPath = path.posix.parse(remotePath);
       parsedPath.base = '.' + parsedPath.base;
       const tmpRemotePath = path.posix.format(parsedPath);
@@ -35,7 +35,7 @@ async function run() {
         localPath,
         tmpRemotePath,
         opts,
-        function(error, result) {
+        function (error, result) {
           if (error) {
             cb(error, result);
           } else {
@@ -83,7 +83,7 @@ async function connect(
   passphrase: string,
   tryKeyboard: boolean
 ) {
-  const ssh = new node_ssh();
+  const ssh = new NodeSSH();
   console.log(`Establishing a SSH connection to ${host}.`);
 
   try {
@@ -107,7 +107,7 @@ async function connect(
 }
 
 async function scp(
-  ssh: node_ssh,
+  ssh: NodeSSH,
   local: string,
   remote: string,
   dotfiles = false,
@@ -144,7 +144,7 @@ async function scp(
   }
 }
 async function putDirectory(
-  ssh: node_ssh,
+  ssh: NodeSSH,
   local: string,
   remote: string,
   dotfiles = false,
@@ -159,7 +159,7 @@ async function putDirectory(
     concurrency: concurrency,
     validate: (path: string) =>
       !fsPath.basename(path).startsWith('.') || dotfiles,
-    tick: function(localPath, remotePath, error) {
+    tick: function (localPath, remotePath, error) {
       if (error) {
         if (verbose) {
           console.log(`❕copy failed for ${localPath}.`);
@@ -189,7 +189,7 @@ async function putDirectory(
   }
 }
 
-async function cleanDirectory(ssh: node_ssh, remote: string, verbose = true) {
+async function cleanDirectory(ssh: NodeSSH, remote: string, verbose = true) {
   try {
     await ssh.execCommand(`rm -rf ${remote}/*`);
     if (verbose) {
@@ -202,7 +202,7 @@ async function cleanDirectory(ssh: node_ssh, remote: string, verbose = true) {
 }
 
 async function putFile(
-  ssh: node_ssh,
+  ssh: NodeSSH,
   local: string,
   remote: string,
   verbose = true

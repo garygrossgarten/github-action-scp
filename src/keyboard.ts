@@ -7,7 +7,7 @@ export const keyboardFunction = password => (
 ) => {
   if (
     prompts.length > 0 &&
-    prompts[0].prompt.toLowerCase().includes("password")
+    prompts[0].prompt.toLowerCase().includes('password')
   ) {
     finish([password]);
   }
