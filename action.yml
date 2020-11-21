@@ -8,6 +8,13 @@ inputs:
   remote:
     description: "Path on the remote server to copy to."
     required: true
+  dotfiles:
+    description: "Determines if files with  leading dot (.) on folder copy is included"
+    required: false
+    default: false
+  rmRemote:
+    description: "If it is a directory, remote files in it will be deleted before the copy is started."
+    required: false
   concurrency:
     description: "Number of concurrent file transfers."
     required: false
@@ -43,6 +50,10 @@ inputs:
   tryKeyboard:
     description: "Try keyboard-interactive user authentication if primary user authentication method fails."
     required: false
+  atomicPut:
+    description: "Upload files to temporary file first, then rename once upload completed"
+    required: false
+    default: false
 runs:
   using: "node12"
   main: "dist/index.js"
