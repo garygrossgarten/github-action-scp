@@ -8,20 +8,31 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - name: checkout
+        uses: actions/checkout@v2
       - name: setup demo
         run: |
           mkdir test
           touch test/oof.txt
       - name: Copy folder content recursively to remote
-        uses: garygrossgarten/github-action-scp@release
+        uses: ./
         with:
           local: test
           remote: scp/directory
           host: ${{ secrets.HOST }}
           username: ${{ secrets.SSH_USER }}
           password: ${{ secrets.PASSWORD }}
+      - name: Copy folder content recursively to remote (clean directory)
+        uses: ./
+        with:
+          local: test
+          remote: scp/directory
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.SSH_USER }}
+          password: ${{ secrets.PASSWORD }}  
+          rmRemote: true  
       - name: Copy single file to remote
-        uses: garygrossgarten/github-action-scp@release
+        uses: ./
         with:
           local: test/oof.txt
           remote: scp/single/readme.md
