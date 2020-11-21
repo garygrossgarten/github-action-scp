@@ -1,7 +1,9 @@
 import * as core from '@actions/core';
 import node_ssh from 'node-ssh';
-import fs from "fs";
+import {SFTPStream} from 'ssh2-streams';
+import fs from 'fs';
 import {keyboardFunction} from './keyboard';
+import path from 'path';
 
 async function run() {
   const host: string = core.getInput('host') || 'localhost';
@@ -16,6 +18,25 @@ async function run() {
   const concurrency: number = +core.getInput('concurrency') || 1;
   const local: string = core.getInput('local');
   const remote: string = core.getInput('remote');
+  const atomicPut: string = core.getInput('atomicPut');
+
+  if (atomicPut) {
+    // patch SFTPStream to atomically rename files
+    const originalFastPut = SFTPStream.prototype.fastPut;
+    SFTPStream.prototype.fastPut = function(localPath, remotePath, opts, cb) {
+      const parsedPath = path.posix.parse(remotePath);
+      parsedPath.base = '.' + parsedPath.base;
+      const tmpRemotePath = path.posix.format(parsedPath);
+      const that = this;
+      originalFastPut.apply(this, [localPath, tmpRemotePath, opts, function(error, result) {
+        if (error) {
+          cb(error, result);
+        } else {
+          that.ext_openssh_rename(tmpRemotePath, remotePath, cb);
+        }
+      }]);
+    };
+  }
 
   try {
     const ssh = await connect(
