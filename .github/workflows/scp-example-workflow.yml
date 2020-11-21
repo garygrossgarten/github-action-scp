@@ -64,6 +64,15 @@ jobs:
           host: ${{ secrets.HOST }}
           username: ${{ secrets.SSH_USER }}
           password: ${{ secrets.PASSWORD }}
-          privateKey: ${{ secrets.PRIVATE_KEY}}    
+          privateKey: ${{ secrets.PRIVATE_KEY}}
+          dotfiles: true
+      - name: Copy with user/pw
+        uses: ./
+        with:
+          local: test/oof.txt
+          remote: scp/user/pw/oof.txt
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.SSH_USER }}
+          password: ${{ secrets.PASSWORD }}        
         env:
           CI: true
