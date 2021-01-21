@@ -239,4 +239,9 @@ async function putMany<T>(
   }
 }
 
+process.on('uncaughtException', (err) => {
+  if (err['code'] !== 'ECONNRESET')
+    throw err
+})
+
 run();
