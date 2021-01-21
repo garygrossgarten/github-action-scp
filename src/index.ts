@@ -145,6 +145,7 @@ async function scp(
     console.error(`⚠️ An error happened:(.`, err.message, err.stack);
     ssh.dispose();
     process.abort();
+    core.setFailed(err.message);
   }
 }
 async function putDirectory(
@@ -202,6 +203,8 @@ async function cleanDirectory(ssh: NodeSSH, remote: string, verbose = true) {
   } catch (error) {
     console.error(`⚠️ An error happened:(.`, error.message, error.stack);
     ssh.dispose();
+    core.setFailed(error.message);
+
   }
 }
 
@@ -219,6 +222,7 @@ async function putFile(
   } catch (error) {
     console.error(`⚠️ An error happened:(.`, error.message, error.stack);
     ssh.dispose();
+    core.setFailed(error.message);
   }
 }
 

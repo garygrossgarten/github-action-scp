@@ -11391,6 +11391,7 @@ function scp(ssh, local, remote, dotfiles = false, concurrency, verbose = true, 
             console.error(`⚠️ An error happened:(.`, err.message, err.stack);
             ssh.dispose();
             process.abort();
+            core.setFailed(err.message);
         }
     });
 }
@@ -11438,6 +11439,7 @@ function cleanDirectory(ssh, remote, verbose = true) {
         catch (error) {
             console.error(`⚠️ An error happened:(.`, error.message, error.stack);
             ssh.dispose();
+            core.setFailed(error.message);
         }
     });
 }
@@ -11452,6 +11454,7 @@ function putFile(ssh, local, remote, verbose = true) {
         catch (error) {
             console.error(`⚠️ An error happened:(.`, error.message, error.stack);
             ssh.dispose();
+            core.setFailed(error.message);
         }
     });
 }
