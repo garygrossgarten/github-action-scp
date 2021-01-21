@@ -6,7 +6,9 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-
+    env:
+      CI: true
+      LOCAL: local
     steps:
       - name: checkout
         uses: actions/checkout@v2
@@ -85,6 +87,3 @@ jobs:
           privateKey: ${{ secrets.PRIVATE_KEY}}
           rmRemote: true
           dotfiles: true    
-        env:
-          CI: true
-          LOCAL: local
