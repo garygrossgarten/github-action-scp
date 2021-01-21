@@ -79,7 +79,7 @@ jobs:
       - name: With ENV
         uses: ./
         with:
-          local: $LOCAL
+          local: ${{ env.LOCAL }}
           remote: scp/directory
           host: ${{ secrets.HOST }}
           username: ${{ secrets.SSH_USER }}
