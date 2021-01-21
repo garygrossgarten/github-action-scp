@@ -11468,6 +11468,10 @@ function putMany(array, asyncFunction) {
         }
     });
 }
+process.on('uncaughtException', (err) => {
+    if (err['code'] !== 'ECONNRESET')
+        throw err;
+});
 run();
 
 
