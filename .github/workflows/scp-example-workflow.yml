@@ -34,7 +34,7 @@ jobs:
           password: ${{ secrets.PASSWORD }}
           privateKey: ${{ secrets.PRIVATE_KEY}}
           rmRemote: true
-          dotfiles: true
+          dotfiles: true   
       - name: Copy folder content recursively to remote (atomic put)
         uses: ./
         with:
@@ -73,6 +73,18 @@ jobs:
           remote: scp/user/pw/oof.txt
           host: ${{ secrets.HOST }}
           username: ${{ secrets.SSH_USER }}
-          password: ${{ secrets.PASSWORD }}        
+          password: ${{ secrets.PASSWORD }}     
+      - name: With ENV
+        uses: ./
+        with:
+          local: $LOCAL
+          remote: scp/directory
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.SSH_USER }}
+          password: ${{ secrets.PASSWORD }}
+          privateKey: ${{ secrets.PRIVATE_KEY}}
+          rmRemote: true
+          dotfiles: true    
         env:
           CI: true
+          LOCAL: local
