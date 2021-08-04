@@ -6,6 +6,14 @@ import fs from 'fs';
 import {keyboardFunction} from './keyboard';
 import path from 'path';
 
+function getBoolWithDefault(key: string, defaultVal: boolean): boolean {
+  const val = core.getInput(key);
+  if (val === '') {
+    return defaultVal;
+  }
+  return !!val;
+}
+
 async function run() {
   const host: string = core.getInput('host') || 'localhost';
   const username: string = core.getInput('username');
@@ -14,13 +22,13 @@ async function run() {
   const password: string = core.getInput('password');
   const passphrase: string = core.getInput('passphrase');
   const tryKeyboard: boolean = !!core.getInput('tryKeyboard');
-  const verbose: boolean = !!core.getInput('verbose') || true;
-  const recursive: boolean = !!core.getInput('recursive') || true;
+  const verbose: boolean = getBoolWithDefault('verbose', true);
+  const recursive: boolean = getBoolWithDefault('recursive', true);
   const concurrency: number = +core.getInput('concurrency') || 1;
   const local: string = core.getInput('local');
-  const dotfiles: boolean = !!core.getInput('dotfiles') || true;
+  const dotfiles: boolean = getBoolWithDefault('dotfiles', true);
   const remote: string = core.getInput('remote');
-  const rmRemote: boolean = !!core.getInput('rmRemote') || false;
+  const rmRemote: boolean = getBoolWithDefault('rmRemote', false);
   const atomicPut: string = core.getInput('atomicPut');
 
   if (atomicPut) {
