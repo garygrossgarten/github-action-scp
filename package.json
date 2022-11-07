@@ -1,6 +1,6 @@
 {
   "name": "@garygrossgarten/github-action-scp",
-  "version": "0.7.3",
+  "version": "0.8.0",
   "description": "Copy a folder to a remote server using SSH.",
   "repository": {
     "type": "git",
