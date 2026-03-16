@@ -1,7 +1,9 @@
 name: scp copy folder to remote via SSH
 
 on:
-  push
+  push:
+    branches: ['master']
+  workflow_dispatch:
 
 jobs:
   build:
@@ -11,7 +13,7 @@ jobs:
       LOCAL: test
     steps:
       - name: checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
       - name: setup demo
         run: |
           mkdir test
@@ -24,7 +26,6 @@ jobs:
           remote: scp/directory
           host: ${{ secrets.HOST }}
           username: ${{ secrets.SSH_USER }}
-          password: ${{ secrets.PASSWORD }}
           privateKey: ${{ secrets.PRIVATE_KEY}}
       - name: Copy folder content recursively to remote (clean directory)
         uses: ./
@@ -33,7 +34,6 @@ jobs:
           remote: scp/directory
           host: ${{ secrets.HOST }}
           username: ${{ secrets.SSH_USER }}
-          password: ${{ secrets.PASSWORD }}
           privateKey: ${{ secrets.PRIVATE_KEY}}
           rmRemote: true
           dotfiles: true   
@@ -44,7 +44,6 @@ jobs:
           remote: scp/atomic
           host: ${{ secrets.HOST }}
           username: ${{ secrets.SSH_USER }}
-          password: ${{ secrets.PASSWORD }}
           privateKey: ${{ secrets.PRIVATE_KEY}}
           rmRemote: true
           dotfiles: true        
@@ -56,7 +55,6 @@ jobs:
           remote: scp/single/readme.md
           host: ${{ secrets.HOST }}
           username: ${{ secrets.SSH_USER }}
-          password: ${{ secrets.PASSWORD }}
           privateKey: ${{ secrets.PRIVATE_KEY}}
       - name: Copy dotfile to remote
         uses: ./
@@ -65,7 +63,6 @@ jobs:
           remote: scp/single/.dot.txt
           host: ${{ secrets.HOST }}
           username: ${{ secrets.SSH_USER }}
-          password: ${{ secrets.PASSWORD }}
           privateKey: ${{ secrets.PRIVATE_KEY}}
           dotfiles: true
       - name: Copy with user/pw
@@ -83,7 +80,6 @@ jobs:
           remote: scp/directory
           host: ${{ secrets.HOST }}
           username: ${{ secrets.SSH_USER }}
-          password: ${{ secrets.PASSWORD }}
           privateKey: ${{ secrets.PRIVATE_KEY}}
           rmRemote: true
           dotfiles: true    
